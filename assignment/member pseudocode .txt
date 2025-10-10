@@ -1,0 +1,113 @@
+DECLARE USER_ID_TEMP AS INTEGER
+DECLARE PASSWORD_TEMP AS ALPHANUMERIC
+DECLARE FLAG AS BOOLEAN
+DECLARE CHOICE AS INTEGER
+
+DECLARE BOOKNAME_TEMP AS ALPHANUMERIC
+DECLARE BOOKID_TEMP AS INTEGER
+DECLARE BOOKCOUNT AS INTEGER
+DECLARE BORROWED_COUNT AS INTEGER
+
+DECLARE USER_ID[10] AS INTEGER
+DECLARE PASSWORD[10] AS ALPHANUMERIC
+DECLARE BOOKNAME[50] AS ALPHANUMERIC
+DECLARE BOOKID[50] AS INTEGER
+DECLARE BORROWED_BOOKS[50] AS ALPHANUMERIC
+
+START
+    OUTPUT "Please input total number of users:"
+    INPUT USER_TOTAL
+    FOR I <- 1 TO USER_TOTAL DO
+        OUTPUT "Enter User ID:"
+        INPUT USER_ID[I]
+        OUTPUT "Enter Password:"
+        INPUT PASSWORD[I]
+    NEXT I
+
+    OUTPUT "Please input total number of books:"
+    INPUT BOOKCOUNT
+    FOR I <- 1 TO BOOKCOUNT DO
+        OUTPUT "Enter Book Name:"
+        INPUT BOOKNAME[I]
+        OUTPUT "Enter Book ID:"
+        INPUT BOOKID[I]
+    NEXT I
+
+    OUTPUT "Please Input User ID:"
+    INPUT USER_ID_TEMP
+    OUTPUT "Please Input Password:"
+    INPUT PASSWORD_TEMP
+
+    FLAG <- FALSE
+
+    FOR I <- 1 TO USER_TOTAL DO
+        IF USER_ID_TEMP = USER_ID[I] AND PASSWORD_TEMP = PASSWORD[I] THEN
+            OUTPUT "Login Successful!"
+            FLAG <- TRUE
+        ENDIF
+    NEXT I
+
+    IF FLAG = FALSE THEN
+        OUTPUT "ERROR: Invalid ID or Password."
+    ENDIF
+
+    WHILE FLAG = TRUE DO
+        OUTPUT "-----------------------------------"
+        OUTPUT "1. Search by Book Name"
+        OUTPUT "2. Search by Book ID"
+        OUTPUT "3. View Borrowed History"
+        OUTPUT "-----------------------------------"
+        OUTPUT "Enter your choice:"
+        INPUT CHOICE
+
+        IF CHOICE = 1 THEN
+            OUTPUT "Please input book name:"
+            INPUT BOOKNAME_TEMP
+            FOUND <- FALSE
+
+            FOR I <- 1 TO BOOKCOUNT DO
+                IF BOOKNAME_TEMP = BOOKNAME[I] THEN
+                    OUTPUT "You have borrowed:", BOOKNAME[I]
+                    BORROWED_COUNT <- BORROWED_COUNT + 1
+                    BORROWED_BOOKS[BORROWED_COUNT] <- BOOKNAME[I]
+                    FOUND <- TRUE
+                ENDIF
+            NEXT I
+
+            IF FOUND = FALSE THEN
+                OUTPUT "Book not found."
+            ENDIF
+
+        ELSE IF CHOICE = 2 THEN
+            OUTPUT "Please input book ID:"
+            INPUT BOOKID_TEMP
+            FOUND <- FALSE
+
+            FOR I <- 1 TO BOOKCOUNT DO
+                IF BOOKID_TEMP = BOOKID[I] THEN
+                    OUTPUT "You have borrowed:", BOOKNAME[I]
+                    BORROWED_COUNT <- BORROWED_COUNT + 1
+                    BORROWED_BOOKS[BORROWED_COUNT] <- BOOKNAME[I]
+                    FOUND <- TRUE
+                ENDIF
+            NEXT I
+
+            IF FOUND = FALSE THEN
+                OUTPUT "Book ID not found."
+            ENDIF
+
+        ELSE IF CHOICE = 3 THEN
+            OUTPUT "Your Borrowed Books:"
+            IF BORROWED_COUNT = 0 THEN
+                OUTPUT "No books borrowed yet."
+            ELSE
+                FOR I <- 1 TO BORROWED_COUNT DO
+                    OUTPUT I, ".", BORROWED_BOOKS[I]
+                NEXT I
+            ENDIF
+
+        ELSE
+            OUTPUT "Please input 1, 2, or 3 only!"
+        ENDIF
+    ENDWHILE
+END
