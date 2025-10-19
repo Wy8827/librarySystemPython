@@ -1,3 +1,4 @@
+
 user_id = []
 password = []
 borrowed_books=[]
@@ -71,7 +72,7 @@ def searchbookname():
             if book[x]["number_of_book_available"] > 0:
                 CHOICE = int(input("Book available\n-----------------------------------\n1. Borrow\n2. Exit\nEnter your choice: "))
                 if CHOICE == 1:
-                    print(f"You have borrowed '{book[x]['book_name']}'")
+                    print(f"You have request to borrow '{book[x]['book_name']}'")
                     book[x]["number_of_book_available"] -= 1
                     borrow_date = datetime.now()
                     due_date = borrow_date + timedelta(days=7)
@@ -106,7 +107,7 @@ def searchbookid():
             if book[x]["number_of_book_available"] > 0:
                 CHOICE = int(input(f"Book available: '{book[x]['book_name']}'\n-----------------------------------\n1. Borrow\n2. Exit\nEnter your choice: "))
                 if CHOICE == 1:
-                    print(f"You have borrowed '{book[x]['book_name']}'")
+                    print(f"You have request to borrow '{book[x]['book_name']}'")
                     book[x]["number_of_book_available"] -= 1
                     borrow_date = datetime.now()
                     due_date = borrow_date + timedelta(days=7)
@@ -139,11 +140,9 @@ def borrowhistory():
         print("Borrowed Books:")
         for b in borrowed_books:
             print(f"- {b['book_name']} (ID: {b['book_id']})")
-            print(f"  Borrowed on: {b['borrow_date']}")
-            print(f"  Due date: {b['due_date']}")
+            print(f"  requested on: {b['borrow_date']}")
+            print(f"  expired date: {b['due_date']}")
 
 
-# Start program
-loginpage()
 # Start program
 loginpage()
