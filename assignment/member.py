@@ -1,6 +1,8 @@
+u
 user_id = []
 password = []
 borrowed_books=[]
+from datetime import datetime, timedelta 
 
 users = [
     {"user_id": 1, "password": "123"},
@@ -72,9 +74,14 @@ def searchbookname():
                 if CHOICE == 1:
                     print(f"You have borrowed '{book[x]['book_name']}'")
                     book[x]["number_of_book_available"] -= 1
+                    borrow_date = datetime.now()
+                    due_date = borrow_date + timedelta(days=7)
+
                     borrowed_books.append({
                         "book_name": book[x]["book_name"],
-                        "book_id": book[x]["book_id"]
+                        "book_id": book[x]["book_id"],
+                        "borrow_date": borrow_date.strftime("%Y-%m-%d"),
+                        "due_date": due_date.strftime("%Y-%m-%d")
                     })
                 elif CHOICE == 2:
                     print("Returning to member page...")
@@ -102,10 +109,16 @@ def searchbookid():
                 if CHOICE == 1:
                     print(f"You have borrowed '{book[x]['book_name']}'")
                     book[x]["number_of_book_available"] -= 1
+                    borrow_date = datetime.now()
+                    due_date = borrow_date + timedelta(days=7)
+
                     borrowed_books.append({
                         "book_name": book[x]["book_name"],
-                        "book_id": book[x]["book_id"]
+                        "book_id": book[x]["book_id"],
+                        "borrow_date": borrow_date.strftime("%Y-%m-%d"),
+                        "due_date": due_date.strftime("%Y-%m-%d")
                     })
+
                 elif CHOICE == 2:
                     print("Returning to member page...")
                     book[x]['bookname']['bookid'] 
@@ -127,7 +140,11 @@ def borrowhistory():
         print("Borrowed Books:")
         for b in borrowed_books:
             print(f"- {b['book_name']} (ID: {b['book_id']})")
+            print(f"  Borrowed on: {b['borrow_date']}")
+            print(f"  Due date: {b['due_date']}")
 
 
+# Start program
+loginpage()
 # Start program
 loginpage()
