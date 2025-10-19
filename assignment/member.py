@@ -1,4 +1,3 @@
-u
 user_id = []
 password = []
 borrowed_books=[]
