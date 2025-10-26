@@ -1,113 +1,190 @@
-DECLARE USER_ID_TEMP AS INTEGER
-DECLARE PASSWORD_TEMP AS ALPHANUMERIC
-DECLARE FLAG AS BOOLEAN
-DECLARE CHOICE AS INTEGER
+DECLARE user_id[], password[], borrowed_books[]
+IMPORT datetime, timedelta
 
-DECLARE BOOKNAME_TEMP AS ALPHANUMERIC
-DECLARE BOOKID_TEMP AS INTEGER
-DECLARE BOOKCOUNT AS INTEGER
-DECLARE BORROWED_COUNT AS INTEGER
+INITIALIZE users = [
+    {user_id: 1, password: "123"},
+    {user_id: 2, password: "123"}
+]
 
-DECLARE USER_ID[10] AS INTEGER
-DECLARE PASSWORD[10] AS ALPHANUMERIC
-DECLARE BOOKNAME[50] AS ALPHANUMERIC
-DECLARE BOOKID[50] AS INTEGER
-DECLARE BORROWED_BOOKS[50] AS ALPHANUMERIC
-
-START
-    OUTPUT "Please input total number of users:"
-    INPUT USER_TOTAL
-    FOR I <- 1 TO USER_TOTAL DO
-        OUTPUT "Enter User ID:"
-        INPUT USER_ID[I]
-        OUTPUT "Enter Password:"
-        INPUT PASSWORD[I]
-    NEXT I
-
-    OUTPUT "Please input total number of books:"
-    INPUT BOOKCOUNT
-    FOR I <- 1 TO BOOKCOUNT DO
-        OUTPUT "Enter Book Name:"
-        INPUT BOOKNAME[I]
-        OUTPUT "Enter Book ID:"
-        INPUT BOOKID[I]
-    NEXT I
-
-    OUTPUT "Please Input User ID:"
+----------------------------------------------------------
+FUNCTION loginpage()
     INPUT USER_ID_TEMP
-    OUTPUT "Please Input Password:"
     INPUT PASSWORD_TEMP
+    SET login_success = False
 
-    FLAG <- FALSE
+    FOR each user IN users
+        IF USER_ID_TEMP == user.user_id AND PASSWORD_TEMP == user.password THEN
+            PRINT "Login Successful!"
+            SET login_success = True
+            CALL member_interface()
+            BREAK
+        END IF
+    END FOR
 
-    FOR I <- 1 TO USER_TOTAL DO
-        IF USER_ID_TEMP = USER_ID[I] AND PASSWORD_TEMP = PASSWORD[I] THEN
-            OUTPUT "Login Successful!"
-            FLAG <- TRUE
-        ENDIF
-    NEXT I
+    IF login_success == False THEN
+        PRINT "ERROR: Invalid ID or Password."
+        CALL loginpage()
+    END IF
+END FUNCTION
+----------------------------------------------------------
 
-    IF FLAG = FALSE THEN
-        OUTPUT "ERROR: Invalid ID or Password."
-    ENDIF
+FUNCTION member_interface()
+    PRINT menu options:
+        1. Search by Book Name
+        2. Search by Book ID
+        3. View Borrowed History
+        4. Log Out
+    INPUT choice
 
-    WHILE FLAG = TRUE DO
-        OUTPUT "-----------------------------------"
-        OUTPUT "1. Search by Book Name"
-        OUTPUT "2. Search by Book ID"
-        OUTPUT "3. View Borrowed History"
-        OUTPUT "-----------------------------------"
-        OUTPUT "Enter your choice:"
-        INPUT CHOICE
+    IF choice == 1 THEN
+        CALL searchbookname()
+    ELSE IF choice == 2 THEN
+        CALL searchbookid()
+    ELSE IF choice == 3 THEN
+        CALL borrowhistory()
+    ELSE IF choice == 4 THEN
+        PRINT "Goodbye!"
+    ELSE
+        PRINT "Invalid choice"
+        CALL member_interface()
+    END IF
+END FUNCTION
+----------------------------------------------------------
 
-        IF CHOICE = 1 THEN
-            OUTPUT "Please input book name:"
-            INPUT BOOKNAME_TEMP
-            FOUND <- FALSE
+FUNCTION read_books_from_file()
+    INITIALIZE books = []
+    OPEN "book.txt" FOR reading
 
-            FOR I <- 1 TO BOOKCOUNT DO
-                IF BOOKNAME_TEMP = BOOKNAME[I] THEN
-                    OUTPUT "You have borrowed:", BOOKNAME[I]
-                    BORROWED_COUNT <- BORROWED_COUNT + 1
-                    BORROWED_BOOKS[BORROWED_COUNT] <- BOOKNAME[I]
-                    FOUND <- TRUE
-                ENDIF
-            NEXT I
+    FOR each line IN file
+        SPLIT line BY "," INTO (book_id, book_name, language, available, author)
+        ADD {
+            book_id: book_id,
+            book_name: book_name,
+            language: language,
+            number_of_book_available: INTEGER(available),
+            author: author
+        } TO books
+    END FOR
 
-            IF FOUND = FALSE THEN
-                OUTPUT "Book not found."
-            ENDIF
+    CLOSE file
+    RETURN books
+END FUNCTION
+----------------------------------------------------------
 
-        ELSE IF CHOICE = 2 THEN
-            OUTPUT "Please input book ID:"
-            INPUT BOOKID_TEMP
-            FOUND <- FALSE
+FUNCTION write_books_to_file(books)
+    OPEN "book.txt" FOR writing
+    FOR each book IN books
+        WRITE book.book_id, book.book_name, book.language, 
+              book.number_of_book_available, book.author TO file
+    END FOR
+    CLOSE file
+END FUNCTION
+----------------------------------------------------------
 
-            FOR I <- 1 TO BOOKCOUNT DO
-                IF BOOKID_TEMP = BOOKID[I] THEN
-                    OUTPUT "You have borrowed:", BOOKNAME[I]
-                    BORROWED_COUNT <- BORROWED_COUNT + 1
-                    BORROWED_BOOKS[BORROWED_COUNT] <- BOOKNAME[I]
-                    FOUND <- TRUE
-                ENDIF
-            NEXT I
+FUNCTION searchbookname()
+    INPUT bookname
+    books = read_books_from_file()
+    SET found = False
 
-            IF FOUND = FALSE THEN
-                OUTPUT "Book ID not found."
-            ENDIF
+    FOR each book IN books
+        IF LOWER(bookname) == LOWER(book.book_name) THEN
+            SET found = True
+            IF book.number_of_book_available > 0 THEN
+                PRINT book details (name, author, language)
+                INPUT CHOICE (1 = Borrow, 2 = Exit)
 
-        ELSE IF CHOICE = 3 THEN
-            OUTPUT "Your Borrowed Books:"
-            IF BORROWED_COUNT = 0 THEN
-                OUTPUT "No books borrowed yet."
+                IF CHOICE == 1 THEN
+                    DECREASE book.number_of_book_available BY 1
+                    CALL write_books_to_file(books)
+
+                    SET borrow_date = current date
+                    SET due_date = borrow_date + 7 days
+
+                    ADD {
+                        book_name: book.book_name,
+                        book_id: book.book_id,
+                        borrow_date: borrow_date,
+                        due_date: due_date
+                    } TO borrowed_books
+
+                    PRINT confirmation and due date
+                ELSE
+                    PRINT "Returning to member page..."
+                    CALL member_interface()
+                END IF
             ELSE
-                FOR I <- 1 TO BORROWED_COUNT DO
-                    OUTPUT I, ".", BORROWED_BOOKS[I]
-                NEXT I
-            ENDIF
+                PRINT "Book is not available right now."
+            END IF
+            BREAK
+        END IF
+    END FOR
 
-        ELSE
-            OUTPUT "Please input 1, 2, or 3 only!"
-        ENDIF
-    ENDWHILE
-END
+    IF found == False THEN
+        PRINT "Book not found."
+    END IF
+
+    CALL member_interface()
+END FUNCTION
+----------------------------------------------------------
+
+FUNCTION searchbookid()
+    INPUT bookid
+    books = read_books_from_file()
+    SET found = False
+
+    FOR each book IN books
+        IF LOWER(bookid) == LOWER(book.book_id) THEN
+            SET found = True
+            IF book.number_of_book_available > 0 THEN
+                PRINT book details (name, author, language)
+                INPUT CHOICE (1 = Borrow, 2 = Exit)
+
+                IF CHOICE == 1 THEN
+                    DECREASE book.number_of_book_available BY 1
+                    CALL write_books_to_file(books)
+
+                    SET borrow_date = current date
+                    SET due_date = borrow_date + 7 days
+
+                    ADD {
+                        book_name: book.book_name,
+                        book_id: book.book_id,
+                        borrow_date: borrow_date,
+                        due_date: due_date
+                    } TO borrowed_books
+
+                    PRINT confirmation and due date
+                ELSE
+                    PRINT "Returning to member page..."
+                    CALL member_interface()
+                END IF
+            ELSE
+                PRINT "Book is not available right now."
+            END IF
+            BREAK
+        END IF
+    END FOR
+
+    IF found == False THEN
+        PRINT "Book not found."
+    END IF
+
+    CALL member_interface()
+END FUNCTION
+----------------------------------------------------------
+
+FUNCTION borrowhistory()
+    IF borrowed_books IS EMPTY THEN
+        PRINT "You have not borrowed any books yet."
+    ELSE
+        PRINT "Borrowed Books:"
+        FOR each record IN borrowed_books
+            PRINT record.book_name, record.book_id
+            PRINT record.borrow_date, record.due_date
+        END FOR
+    END IF
+END FUNCTION
+----------------------------------------------------------
+
+# MAIN PROGRAM
+CALL loginpage()
