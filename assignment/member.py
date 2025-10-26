@@ -1,4 +1,3 @@
-
 user_id = []
 password = []
 borrowed_books=[]
@@ -9,12 +8,6 @@ users = [
     {"user_id": 2, "password": "123"}
 ]
 
-book = [
-    {"book_name": "name1", "book_id": 123, "number_of_book_available": 2},
-    {"book_name": "name2", "book_id": 1234, "number_of_book_available": 0},
-    {"book_name": "name3", "book_id": 12345, "number_of_book_available": 1},
-    {"book_name": "name4", "book_id": 123456, "number_of_book_available": 3},
-]
 
 
 def loginpage():
@@ -61,76 +54,100 @@ def member_interface_xuan(xuan):
         borrowhistory()
 
 
-def searchbookname():
-    bookname = input("Please enter book name: ")
-    print(f"Searching for '{bookname}' ...")
+def read_books_from_file():
+    books = []
+    with open("book.txt", "r", encoding="utf-8") as file:
+        for line in file:
+            parts = [p.strip() for p in line.strip().split(",")]
+            if len(parts) == 5:
+                book_id, book_name, language, available, author = parts
+                books.append({
+                    "book_id": book_id,
+                    "book_name": book_name,
+                    "language": language,
+                    "number_of_book_available": int(available),
+                    "author": author
+                })
+    return books
 
-    found_book = False
-    for x in range(len(book)):
-        if bookname == book[x]["book_name"]:
-            found_book = True
-            if book[x]["number_of_book_available"] > 0:
+
+def write_books_to_file(books):
+    with open("book.txt", "w", encoding="utf-8") as file:
+        for b in books:
+            file.write(f"{b['book_id']}, {b['book_name']}, {b['language']}, {b['number_of_book_available']}, {b['author']}\n")
+
+
+def searchbookname():
+    bookname = input("Please enter book name: ").strip()
+    books = read_books_from_file()
+    found = False
+
+    for b in books:
+        if bookname.lower() == b["book_name"].lower():
+            found = True
+            if b["number_of_book_available"] > 0:
+                print(f"Book found: {b['book_name']} by {b['author']} ({b['language']})")
                 CHOICE = int(input("Book available\n-----------------------------------\n1. Borrow\n2. Exit\nEnter your choice: "))
                 if CHOICE == 1:
-                    print(f"You have request to borrow '{book[x]['book_name']}'")
-                    book[x]["number_of_book_available"] -= 1
+                    b["number_of_book_available"] -= 1
+                    write_books_to_file(books)
+
                     borrow_date = datetime.now()
                     due_date = borrow_date + timedelta(days=7)
-
                     borrowed_books.append({
-                        "book_name": book[x]["book_name"],
-                        "book_id": book[x]["book_id"],
+                        "book_name": b["book_name"],
+                        "book_id": b["book_id"],
                         "borrow_date": borrow_date.strftime("%Y-%m-%d"),
                         "due_date": due_date.strftime("%Y-%m-%d")
                     })
-                elif CHOICE == 2:
+                    print(f"You borrowed '{b['book_name']}'. Due date: {due_date.strftime('%Y-%m-%d')}")
+                else:
                     print("Returning to member page...")
-                    return member_interface()
-            else:
-                print("Book is not available right now.")
-            break  # stop searching once book is found
-
-    if not found_book:
-        print("Book not found.")
-        return member_interface()
-    return member_interface()
-
-
-def searchbookid():
-    bookid = int(input("Please enter book ID: "))
-    print(f"Searching for book ID '{bookid}'...")
-
-    found_book = False
-    for x in range(len(book)):
-        if bookid == book[x]["book_id"]:
-            found_book = True
-            if book[x]["number_of_book_available"] > 0:
-                CHOICE = int(input(f"Book available: '{book[x]['book_name']}'\n-----------------------------------\n1. Borrow\n2. Exit\nEnter your choice: "))
-                if CHOICE == 1:
-                    print(f"You have request to borrow '{book[x]['book_name']}'")
-                    book[x]["number_of_book_available"] -= 1
-                    borrow_date = datetime.now()
-                    due_date = borrow_date + timedelta(days=7)
-
-                    borrowed_books.append({
-                        "book_name": book[x]["book_name"],
-                        "book_id": book[x]["book_id"],
-                        "borrow_date": borrow_date.strftime("%Y-%m-%d"),
-                        "due_date": due_date.strftime("%Y-%m-%d")
-                    })
-
-                elif CHOICE == 2:
-                    print("Returning to member page...")
-                    book[x]['bookname']['bookid'] 
                     return member_interface()
             else:
                 print("Book is not available right now.")
             break
 
-    if not found_book:
+    if not found:
         print("Book not found.")
-        return member_interface()
     return member_interface()
+
+
+def searchbookid():
+    bookid = input("Please enter book ID: ").strip()
+    books = read_books_from_file()
+    found = False
+
+    for b in books:
+        if bookid.lower() == b["book_id"].lower():
+            found = True
+            if b["number_of_book_available"] > 0:
+                print(f"Book found: {b['book_name']} by {b['author']} ({b['language']})")
+                CHOICE = int(input("Book available\n-----------------------------------\n1. Borrow\n2. Exit\nEnter your choice: "))
+                if CHOICE == 1:
+                    b["number_of_book_available"] -= 1
+                    write_books_to_file(books)
+
+                    borrow_date = datetime.now()
+                    due_date = borrow_date + timedelta(days=7)
+                    borrowed_books.append({
+                        "book_name": b["book_name"],
+                        "book_id": b["book_id"],
+                        "borrow_date": borrow_date.strftime("%Y-%m-%d"),
+                        "due_date": due_date.strftime("%Y-%m-%d")
+                    })
+                    print(f"You borrowed '{b['book_name']}'. Due date: {due_date.strftime('%Y-%m-%d')}")
+                else:
+                    print("Returning to member page...")
+                    return member_interface()
+            else:
+                print("Book is not available right now.")
+            break
+
+    if not found:
+        print("Book not found.")
+    return member_interface()
+
 
 
 def borrowhistory():
