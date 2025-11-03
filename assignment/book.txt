@@ -1,10 +1,1 @@
-C1, Journey to the West, Chinese, 1, Wu Cheng'en
-C2, Three Kingdoms, Chinese, 2, Luo Guanzhong
-C3, Dream of the Red Chamber, Chinese, 1, Cao Xueqin
-E1, The Hobbit, English, 3, J R R Tolkien
-E2, The Martian, English, 2, Andy Weir
-E3, Pride and Prejudice, English, 1, Jane Austen
-M1, Hikayat Hang Tuah, Malay, 1, Pengarang Tidak Diketahui
-M2, Si Tanggang, Malay, 2, Pak Ali
-M3, Salina, Malay, 1, A Samad Said
-E1,The Hobbit,English,2,"J R R Tolkien"
+9780451524935,Nineteen Eighty-Fou,english,1,George Orwell
