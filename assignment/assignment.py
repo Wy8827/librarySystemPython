@@ -17,9 +17,9 @@ def isbn_input():
         isbn = input("Enter Book ISBN : ").strip()
         isbn1 = input("Enter Book ISBN Again to Verify : ").strip()
         if isbn == "0":
-            return
+            return None
         if isbn1 == "0":
-            return
+            return None
         if isbn != isbn1:
             print("ISBN does not match!\n")
             continue
