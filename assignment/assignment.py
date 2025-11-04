@@ -136,7 +136,10 @@ def verify_login(role):
         while True:
             while True:
                 print("\nType 0 to back to login menu!")
-                username = input(f"Enter {role} name (minimum 3 characters and maximum 10 characters): ").strip()
+                print("***")
+                print('Minimum 3 characters and maximum 10 characters')
+                print("***")
+                username = input(f"Enter {role} name: ").strip()
                 if username == "0":
                     print()
                     return None
@@ -264,16 +267,15 @@ def admin_menu():
         while True:
             print("\n=== ADMIN MENU ===")
             print("1. Manage books")
-            print("2. View Book")
-            print("3. Register New Library Staff")
-            print("4. Change user password")
+            print("2. Register New Library Staff")
+            print("3. Change user password")
             print("0. Logout")
             op2 = input("Enter your choice: ")
             if op2 == "1":
                 while True:
                     print("\n=== Manage Book Menu ===")
                     print("1. Add Book")
-                    print("2. Edit Book")
+                    print("2. Modify Book")
                     print("3. Delete Book")
                     print("0. Back to Admin Menu")
                     op2_1 = input("Enter your choice: ")
@@ -288,9 +290,9 @@ def admin_menu():
                         continue
                     elif op2_1 == "0":
                         break
-            elif op2 == "3":
+            elif op2 == "2":
                 register_user("staff")
-            elif op2 == "4":
+            elif op2 == "3":
                 admin_change_user_password()
             elif op2 == "0":
                 print("Logging out...\n")
@@ -532,13 +534,13 @@ def deletebook():
                     else:
                         f_out.write(f"{ex_id},{ex_name},{ex_cat},{ex_quan},{ex_author}\n")
             if not found:
-                print("No book found. Nothing deleted.\n")
+                print("No book found. Nothing deleted.")
                 continue
             with open(temp, 'r', encoding='utf-8') as f_inp, open(book_file, 'w', encoding='utf-8') as f_outp:
                 for line in f_inp:
                     if line.strip():
                         f_outp.write(line if line.endswith("\n") else line + "\n")
-            print("Book deleted successfully!\n")
+            print("Book deleted successfully!")
             break
     except FileNotFoundError:
         print("Books file not found.\n")
