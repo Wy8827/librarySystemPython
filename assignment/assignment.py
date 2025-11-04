@@ -264,7 +264,7 @@ def admin_menu():
         while True:
             print("\n=== ADMIN MENU ===")
             print("1. Manage books")
-            print("2. View users")
+            print("2. View Book")
             print("3. Register New Library Staff")
             print("4. Change user password")
             print("0. Logout")
@@ -275,7 +275,6 @@ def admin_menu():
                     print("1. Add Book")
                     print("2. Edit Book")
                     print("3. Delete Book")
-                    print("4. View Book")
                     print("0. Back to Admin Menu")
                     op2_1 = input("Enter your choice: ")
                     if op2_1 == "1":
@@ -286,8 +285,6 @@ def admin_menu():
                         continue
                     elif op2_1 == "3":
                         deletebook()
-                        continue
-                    elif op2_1 == "4":
                         continue
                     elif op2_1 == "0":
                         break
