@@ -1,1 +1,30 @@
-9780451524935,Nineteen Eighty-Fou,english,1,George Orwell
+9780451524935,Nineteen Eighty-Four,English,1,George Orwell
+9780747532743,Harry Potter and the Philosopher's Stone,English,3,J.K. Rowling
+9780061120084,To Kill a Mockingbird,English,2,Harper Lee
+9780141439600,Pride and Prejudice,English,4,Jane Austen
+9780141182803,The Great Gatsby,English,3,F. Scott Fitzgerald
+9780307474278,The Girl with the Dragon Tattoo,English,2,Stieg Larsson
+9780618640157,The Hobbit,English,5,J.R.R. Tolkien
+9780544003415,The Lord of the Rings,English,2,J.R.R. Tolkien
+9780140449266,Crime and Punishment,English,2,Fyodor Dostoevsky
+9780060850524,Brave New World,English,3,Aldous Huxley
+9780307277671,The Road,English,2,Cormac McCarthy
+9780374533557,The Kite Runner,English,4,Khaled Hosseini
+9780143039433,Life of Pi,English,3,Yann Martel
+9780743273565,The Catcher in the Rye,English,2,J.D. Salinger
+9780307346605,The Book Thief,English,3,Markus Zusak
+9780062315007,The Alchemist,English,4,Paulo Coelho
+9780385504201,Angels and Demons,English,2,Dan Brown
+9780307949486,The Fault in Our Stars,English,3,John Green
+9780345803481,Fifty Shades of Grey,English,2,E.L. James
+9780553386790,A Game of Thrones,English,3,George R.R. Martin
+9789814893476,Journey to the West,English,2,Wu Cheng'en
+9787510452062,The Three-Body Problem,English,3,Liu Cixin
+9789671439201,Salina,Malay,2,A. Samad Said
+9786020324785,Laskar Pelangi,Indonesian,2,Andrea Hirata
+9780142437339,Moby-Dick,English,1,Herman Melville
+9780140449181,The Odyssey,English,2,Homer
+9780140449112,The Iliad,English,2,Homer
+9780241341629,Frankenstein,English,2,Mary Shelley
+9780141441146,Great Expectations,English,3,Charles Dickens
+9780141439518,Jane Eyre,English,2,Charlotte Brontë
