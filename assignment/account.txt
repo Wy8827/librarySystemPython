@@ -2,3 +2,4 @@ admin,12345,admin
 ngwanyang,123,member
 charlie,12345,member
 ruben,ruben123,staff
+wongwei,1,member
