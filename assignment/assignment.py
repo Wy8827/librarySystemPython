@@ -185,33 +185,54 @@ def register_user(role):
     try:
         safe = lambda s: s.replace(",", " ")
         if role == "member":
-            print("WELCOME TO LIBRARY SYSTEM")
-            print("=== REGISTRATION NEW MEMBER ===")
+            print("\n=== REGISTRATION NEW MEMBER ===")
         else:
-            print("=== REGISTRATION NEW LIBRARY STAFF ===")
+            print("\n=== REGISTRATION NEW LIBRARY STAFF ===")
 
         user_found = True
         while user_found:
             while True:
-                new_name = input("Enter username (minimum 3 characters and maximum 10 characters): ").strip()
+                print("Type 0 to back to main menu!")
+                print("***")
+                print("username require minimum 3 characters, maximum 10 characters and include only letters/numbers")
+                print("***")
+                new_name = input("Enter username: ").strip()
+                if new_name == "0":
+                    print()
+                    return None
                 if len(new_name) < 3 or len(new_name) >10:
                     print("Username must be at least 3 characters and at most 10 characters.")
                     continue
-
                 if not new_name.isalnum():
                     print("Username must be letters/numbers only.")
                     continue
                 break
 
-            new_pass = input("Enter password: ").strip()
-            if not new_pass:
-                print("Password cannot be empty.\n")
-                continue
-            if new_pass=='0':
-                print("Password cannot be zero.\n")
-                continue
+            while True:
+                print("***")
+                print("password cannot be 0 or empty and include only letters/numbers")
+                print("***")
+                new_pass = input("Enter password: ").strip()
+                if new_pass == "0":
+                    print()
+                    return None
+                if not new_pass:
+                    print("Password cannot be empty.\n")
+                    continue
+                if not new_pass.isalnum():
+                    print("Password must be letters/numbers only.")
+                    continue
+                new_pass2 = input("Re-enter password: ").strip()
+                if new_pass2 == "0":
+                    print()
+                    return None
+                if new_pass != new_pass2:
+                    print("Passwords do not match. Try again.")
+                    continue
+                break
 
             try:
+                ensure_newline(account_file)
                 with open(account_file, "r") as find:
                     for line in find:
                         if not line.strip():
@@ -308,10 +329,8 @@ def admin_change_user_password():
                         continue
 
                     user, pw, role = parts
-
                     if user.lower() == target.lower():
                         found = True
-
                         # ask for new password with confirmation
                         while True:
                             p1 = input("Enter NEW password: ").strip()
@@ -327,8 +346,8 @@ def admin_change_user_password():
                             if not p1:
                                 print("Password cannot be empty. Try again.")
                                 continue
-                            if "," in p1:
-                                print("Password cannot contain commas. Try again.")
+                            if p1.isalnum():
+                                print("Password must be letters/numbers only.")
                                 continue
                             if p1 != p2:
                                 print("Passwords do not match. Try again.")
@@ -353,7 +372,7 @@ def admin_change_user_password():
                 for ln in r:
                     if ln.strip():
                         w.write(ln if ln.endswith("\n") else ln + "\n")
-            return
+            return None
 
     except FileNotFoundError:
         print("Account file not found.\n")
