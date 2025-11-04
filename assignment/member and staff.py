@@ -1,3 +1,6 @@
+import os
+from datetime import datetime, timedelta, date
+
 account_file = "account.txt"
 book_file = "book.txt"
 pending_file = "pending_borrow.txt"
@@ -159,7 +162,7 @@ def verify_login(role):
                             elif role == "staff":
                                 staff_menu()
                             elif role == "member":
-                                user_menu()
+                                member_menu(username)
                             return None
             except FileNotFoundError:
                 print("Account file not found.")
