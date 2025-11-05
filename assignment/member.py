@@ -159,7 +159,7 @@ def searchbookid(current_user):
                     write_books_to_file(books)
 
                     borrow_date = datetime.now()
-                    due_date = borrow_date + timedelta(days=7)
+                    due_date = borrow_date + timedelta(days=3)
                     borrowed_books.append({
                         "book_name": b["book_name"],
                         "book_id": b["book_id"],
@@ -190,6 +190,7 @@ def borrowhistory(current_user):
             print(f"- {b['book_name']} (ID: {b['book_id']})")
             print(f"  requested on: {b['borrow_date']}")
             print(f"  expired date: {b['due_date']}")
+    return member_interface(current_user)
 
 
 # ✅ Start program
