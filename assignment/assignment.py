@@ -7,17 +7,19 @@ pending_file = "pending_borrow.txt"
 borrowed_file = "borrowed_book.txt"
 
 def ensure_newline(path):
+    #ensure new line before add book, register account for member and staff
     try:
         with open(path, 'r+', encoding='utf-8') as f:
             data = f.read()                 # cursor moves to end after reading
             if data and not data.endswith('\n'):
-                f.write('\n')               # write ONE newline at current (end)
+                f.write('\n')               # write one newline at current (end)
     except FileNotFoundError:
         # If file doesn't exist, create it empty
         open(path, 'a', encoding='utf-8').close()
 
 def isbn_input():
     while True:
+        #enter and verify book isbn
         isbn = input("Enter Book ISBN : ").strip()
         if isbn == "0":
             return isbn
@@ -30,14 +32,16 @@ def isbn_input():
 
         clean_isbn = isbn.replace("-", "").replace(" ", "")
         if len(clean_isbn) == 10:
+            #check whether the 10 digit number is valid isbn-10 format or not
             if not valid_isbn10(clean_isbn):
                 print("Invalid ISBN-10. Please try again.\n")
                 continue
-            # convert and store ISBN-13
+            # convert and store ISBN-13 if the ISBN-10 is valid
             clean_isbn = isbn10_to_isbn13(clean_isbn)
             print(f"Converting ISBN-10 → ISBN-13: {clean_isbn}\n")
             return clean_isbn
         elif len(clean_isbn) == 13:
+            #check whether the 13 digit number is valid isbn-13 format or not
             if not valid_isbn13(clean_isbn):
                 print("Invalid ISBN-13. Please try again.\n")
                 continue
@@ -88,6 +92,7 @@ def isbn10_to_isbn13(s):
 def login():
     while True:
         try:
+            #main menu of library management system
             print("=== WELCOME TO LIBRARY SYSTEM ===")
             print("1. Library Admin")
             print("2. Library Staff")
@@ -96,6 +101,7 @@ def login():
             print("5. Register New User")
             print("0. Exit")
 
+            #different option to enter different menu or function
             op1 = input("Enter your choice: ")
             if op1 == "0":
                 print("Goodbye!")
@@ -131,18 +137,21 @@ def login():
             continue  # go back to loop
 
 def verify_login(role):
+    #verify login for admin, staff and member
     cnt = 0
     try:
         while True:
             while True:
-                print("\nType 0 to back to login menu!")
+                print("\nType 0 to back to main menu!")
                 print("***")
                 print('Minimum 3 characters and maximum 10 characters')
                 print("***")
                 username = input(f"Enter {role} name: ").strip()
+                #username cannot be 0, 0 will back to main menu
                 if username == "0":
                     print()
                     return None
+                #length of username is between 3 and 10
                 if len(username) < 3 or len(username) >10:
                     print("Username must be at least 3 characters and at most 10 characters.")
                     continue
@@ -150,12 +159,13 @@ def verify_login(role):
                     print("Username must be letters/numbers only.")
                     continue
                 break
-
+            #enter password
             password = input("Enter password: ")
             if password == '0':
                 print()
                 return None
             try:
+                #open account.txt to check username and password is valid
                 with open(account_file, "r") as f:
                     for line in f:
                         user, pw, user_role = line.strip().split(",")
@@ -172,7 +182,7 @@ def verify_login(role):
             except FileNotFoundError:
                 print("Account file not found.")
                 return None
-
+            #5 chances is allowed for one time, if more than 5 tries, automatically back to main menu
             cnt += 1
             if cnt >= 5:
                 print("Login failed.\n")
@@ -186,6 +196,7 @@ def verify_login(role):
 
 def register_user(role):
     try:
+        #member and staff registration
         safe = lambda s: s.replace(",", " ")
         if role == "member":
             print("\n=== REGISTRATION NEW MEMBER ===")
@@ -200,6 +211,7 @@ def register_user(role):
                 print("username require minimum 3 characters, maximum 10 characters and include only letters/numbers")
                 print("***")
                 new_name = input("Enter username: ").strip()
+                #username cannot be 0 and length should between 3 and 10, only letter and number is allowed
                 if new_name == "0":
                     print()
                     return None
@@ -212,6 +224,7 @@ def register_user(role):
                 break
 
             while True:
+                #pasword cannot be 0 or empty and only letter and number is allowed
                 print("***")
                 print("password cannot be 0 or empty and include only letters/numbers")
                 print("***")
@@ -236,11 +249,13 @@ def register_user(role):
 
             try:
                 ensure_newline(account_file)
+                #open account.txt
                 with open(account_file, "r") as find:
                     for line in find:
                         if not line.strip():
                             continue
                         exist_name, exist_pass, exist_role = [p.strip() for p in line.strip().split(',')]
+                        #if same username found, register will fail and let user try again
                         if new_name.lower() == exist_name.lower():
                             print("User already registered! Please try again.\n")
                             user_found = True
@@ -251,7 +266,7 @@ def register_user(role):
                 print("Account file not found. Creating new one...")
                 open(account_file, "a").close()
                 user_found = False
-
+            #insert account record in to account.txt if not same username found
             if not user_found:
                 role_str = "member" if role == "member" else "staff"
                 new_register = f'{safe(new_name)},{safe(new_pass)},{role_str}\n'
@@ -265,6 +280,7 @@ def register_user(role):
 def admin_menu():
     try:
         while True:
+            #admin menu
             print("\n=== ADMIN MENU ===")
             print("1. Manage books")
             print("2. Register New Library Staff")
@@ -273,6 +289,7 @@ def admin_menu():
             op2 = input("Enter your choice: ")
             if op2 == "1":
                 while True:
+                    #admin manage book menu
                     print("\n=== Manage Book Menu ===")
                     print("1. Add Book")
                     print("2. Modify Book")
@@ -304,9 +321,11 @@ def admin_menu():
 
 def admin_change_user_password():
     try:
+        #admin help to change password if user forget their password
         print("\n=== ADMIN: CHANGE USER PASSWORD ===")
         while True:
             print("Type 0 to back to admin menu!")
+            #input username to find the account
             target = input("Enter username to reset: ").strip()
             if target == "0":
                 return None
@@ -383,6 +402,7 @@ def addbook():
         safe = lambda s: s.replace(",", " ")
         print("\n=== ADD BOOK ===")
         print("Type 0 to back to manage book menu!")
+        #call isbn_input() to get isbn
         clean_isbn=isbn_input()
         if clean_isbn == "0":
             return None
@@ -391,6 +411,7 @@ def addbook():
             return None
         while True:
             try:
+                #looping quantity input if user type negative integer or non integer
                 quantity = int(input("Enter book quantity: ").strip())
                 if quantity == 0:
                     return None
@@ -409,29 +430,30 @@ def addbook():
         book_found = False
 
         try:
+            #open book_file
             ensure_newline(book_file)
             with open(book_file, 'r', encoding='utf-8') as f_in, open(temp, 'w', encoding='utf-8') as f_out:
                 for line in f_in:
                     if not line.strip():
                         continue
-
                     ex_isbn, ex_name, ex_cat, ex_quan, ex_author = line.strip().split(',')
+                    #if isbn match record in the book_file, only the quantity will be updated, then write the current record to temp file
                     if ex_isbn.strip().lower() == clean_isbn.lower():
                         book_found = True
                         new_quantity = int(ex_quan) + quantity
-                        updated_line = f"{ex_isbn.strip()},{ex_name.strip()},{ex_cat.strip()},{new_quantity},{ex_author.strip()}\n"
+                        updated_line = f"{ex_isbn.strip()},{ex_name.strip()},{ex_cat.capitalize().strip()},{new_quantity},{ex_author.strip()}\n"
                         f_out.write(updated_line)
                     else:
                         f_out.write(line)
         except FileNotFoundError:
             print("Book file not found. Creating a new one.")
             open(book_file, "a").close()
-
+        #insert new record if isbn does not match
         if not book_found:
-            new_record = f'{safe(clean_isbn)},{safe(book_name)},{safe(category)},{quantity},{safe(book_author)}\n'
+            new_record = f'{safe(clean_isbn)},{safe(book_name)},{safe(category.capitalize())},{quantity},{safe(book_author)}\n'
             with open(temp, 'a', encoding='utf-8') as f_out:
                 f_out.write(new_record)
-
+        #rewrite book_file with temp file record
         with open(temp, 'r', encoding='utf-8') as f_inp, open(book_file, 'w', encoding='utf-8') as f_outp:
             for line in f_inp:
                 if not line.strip():
@@ -447,17 +469,20 @@ def editbook():
         while True:
             print("\n=== MODIFY BOOK ===")
             print("Type 0 to back to manage book menu!")
+            #search the book need to modify
             book_search = input("Enter ISBN/BOOK NAME to modify: ").replace("-", "").replace(" ", "").strip().lower()
             if book_search == "0":
                 return
             safe = lambda s: s.replace(",", " ")
             book_found = False
             ensure_newline(book_file)
+            #open temp file
             with open(book_file, 'r', encoding='utf-8') as f_in, open(temp, 'w', encoding='utf-8') as f_out:
                 for line in f_in:
                     if not line.strip():
                         continue
                     else:
+                        #show previous book detail
                         ex_isbn, ex_name, ex_cat, ex_quan, ex_author = line.strip().split(',')
                         if ex_name.strip().lower() == book_search or ex_isbn.strip().lower() == book_search:
                             book_found = True
@@ -466,9 +491,10 @@ def editbook():
                             print(f"Current Book Category: {ex_cat}")
                             print(f"Current Book Quantity: {ex_quan}")
                             print(f"Current Book Author: {ex_author}\n")
+                            print("Type 0 to back to manage book menu!")
                             print("ENTER NEW BOOK DETAIL")
 
-                            clean_isbn = isbn_input()
+                            clean_isbn = isbn_input()  #input new detail for the book
                             if clean_isbn == "0":
                                 return None
                             new_name = input("Enter book name: ").strip()
@@ -492,14 +518,16 @@ def editbook():
                             new_author = input("Enter book author: ").strip()
                             if new_author == '0':
                                 return None
-
-                            updated_line = f"{safe(clean_isbn)},{safe(new_name)},{safe(new_category)},{quantity},{safe(new_author)}\n"
+                            #write updated detail for the book to temp file
+                            updated_line = f"{safe(clean_isbn)},{safe(new_name)},{safe(new_category.capitalize())},{quantity},{safe(new_author)}\n"
                             f_out.write(updated_line)
+                            print("Modify successfully!")
                         else:
-                            f_out.write(line)
+                            f_out.write(line)#write record to temp file if not match the book need to modify
             if not book_found:
                 print("Book not found.")
                 continue
+            #rewrite the book_file with temp file record
             with open(temp, 'r', encoding='utf-8') as f_inp, open(book_file, 'w', encoding='utf-8') as f_outp:
                 for line in f_inp:
                     if not line.strip():
@@ -515,10 +543,11 @@ def deletebook():
         while True:
             print("\n=== DELETE BOOK ===")
             print("Type 0 to back to manage book menu!")
-            book_search = input("Enter ISBN/BOOK NAME to modify: ").replace("-", "").replace(" ", "").strip().lower()
+            book_search = input("Enter ISBN/BOOK NAME to Delete: ").replace("-", "").replace(" ", "")
             if book_search == "0":
                 return
             found = False
+            #open temp file for write and book_file for read
             with open(book_file, 'r', encoding='utf-8') as f_in, open(temp, 'w', encoding='utf-8') as f_out:
                 for line in f_in:
                     if not line.strip():
@@ -528,14 +557,18 @@ def deletebook():
                         f_out.write(line if line.endswith("\n") else line + "\n")
                         continue
                     ex_id, ex_name, ex_cat, ex_quan, ex_author = parts
-                    if ex_id.lower() == book_search.lower() or ex_name.lower() == book_search.lower():
+                    ex_name=ex_name.strip().lower().replace(" ", "")
+                    #if book searched match record in book_file skip writing this record to temp file
+                    if ex_id.lower().strip() == book_search.lower().strip() or ex_name == book_search.lower().strip():
                         found = True
                         continue
                     else:
+                        #write record does not matched with book search into temp file
                         f_out.write(f"{ex_id},{ex_name},{ex_cat},{ex_quan},{ex_author}\n")
             if not found:
                 print("No book found. Nothing deleted.")
                 continue
+            #rewrite book_file with temp file record
             with open(temp, 'r', encoding='utf-8') as f_inp, open(book_file, 'w', encoding='utf-8') as f_outp:
                 for line in f_inp:
                     if line.strip():
@@ -852,7 +885,7 @@ def search_and_inquiry_member(username):
             return
 
         with open(book_file, "r") as f:
-            books = [line.strip().split(", ") for line in f if line.strip()]
+            books = [line.strip().split(",") for line in f if line.strip()]
 
         for book in books:
             if len(book) != 5:
