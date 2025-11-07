@@ -441,7 +441,7 @@ def addbook():
                     if ex_isbn.strip().lower() == clean_isbn.lower():
                         book_found = True
                         new_quantity = int(ex_quan) + quantity
-                        updated_line = f"{ex_isbn.strip()},{ex_name.strip()},{ex_cat.capitalize().strip()},{new_quantity},{ex_author.strip()}\n"
+                        updated_line = f"{ex_isbn.strip()},{ex_name},{ex_cat.capitalize()},{new_quantity},{ex_author}\n"
                         f_out.write(updated_line)
                     else:
                         f_out.write(line)
@@ -633,7 +633,7 @@ def staff_pending_approval():
         print("=" * 119)
 
         for i, line in enumerate(lines, start=1):
-            parts = line.split(", ")
+            parts = line.split(",")
             if len(parts) < 4:
                 continue
             user, book_isbn, title, req_date = parts
@@ -654,7 +654,7 @@ def staff_pending_approval():
             print("Invalid index.\n")
             return
 
-        user, book_isbn, title, req_date = lines[idx].split(", ")
+        user, book_isbn, title, req_date = lines[idx].split(",")
 
         issue_date = datetime.now().strftime("%Y-%m-%d")
         due_date = (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d")
@@ -696,7 +696,7 @@ def staff_reject_pending():
         print("=" * 119)
 
         for i, line in enumerate(lines, start=1):
-            parts = line.split(", ")
+            parts = line.split(",")
             if len(parts) < 4:
                 continue
             user, book_isbn, title, req_date = parts
@@ -717,7 +717,7 @@ def staff_reject_pending():
             print("Invalid index.\n")
             return
 
-        user, book_isbn, title, req_date = lines[idx].split(", ")
+        user, book_isbn, title, req_date = lines[idx].split(",")
         del lines[idx]
         with open(pending_file, "w") as f:
             for l in lines:
@@ -746,7 +746,7 @@ def staff_issue_physical():
             return
 
         with open(book_file, "r") as f:
-            books = [line.strip().split(", ") for line in f if line.strip()]
+            books = [line.strip().split(",") for line in f if line.strip()]
 
         available = None
         for book in books:
@@ -784,7 +784,7 @@ def return_book():
         returned = False
         with open(borrowed_file, "r") as f:
             for line in f:
-                user, book, issue, due, rdate = line.strip().split(", ")
+                user, book, issue, due, rdate = line.strip().split(",")
                 if user == username and book.lower() == title.lower() and rdate == "N/A":
                     updated.append(f"{user}, {book}, {issue}, {due}, {return_date}\n")
                     returned = True
@@ -815,7 +815,7 @@ def search_and_inquiry_staff():
             print(f"| {'BOOK ISBN':^20} | {'BOOK TITLE':^50} | {'AUTHOR':^30} | {'LANGUAGE':^12} | {'STATUS':^13} |")
             print("=" * 141)
             for line in f:
-                book_isbn, title, language, quantity, author = line.strip().split(", ")
+                book_isbn, title, language, quantity, author = line.strip().split(",")
                 if keyword in book_isbn.lower() or keyword in title.lower() or keyword in author.lower():
                     status = "Available" if int(quantity) > 0 else "Unavailable"
                     print(f"| {book_isbn:^20} | {title:<50} | {author:<30} | {language:^12} | {status:^13} |")
@@ -841,7 +841,7 @@ def report_issued_books():
             print(f"| {'USERNAME':^15} | {'BOOK TITLE':^50} | {'ISSUED':^12} | {'DUE':^12} | {'RETURNED':^12} |")
             print("=" * 117)
             for line in lines:
-                user, title, issue, due, returned = line.strip().split(", ")
+                user, title, issue, due, returned = line.strip().split(",")
                 print(f"| {user:^15} | {title:<50} | {issue:^12} | {due:^12} | {returned:^12} |")
             print("=" * 117)
     except FileNotFoundError:
@@ -934,7 +934,7 @@ def view_my_pending_requests(username):
         print("=" * 95)
 
         for line in lines:
-            parts = line.split(", ")
+            parts = line.split(",")
             if len(parts) == 4:
                 user, book_id, title, date_ = parts
                 if user == username:
@@ -971,7 +971,7 @@ def view_my_borrowed_books(username):
         print("=" * 102)
 
         for line in lines:
-            parts = line.split(", ")
+            parts = line.split(",")
             if len(parts) == 5:
                 user, title, issue, due, returned = parts
                 if user == username and returned == "N/A":
@@ -994,7 +994,7 @@ def cleanup_expired_pending():
 
     with open(pending_file, "r") as f:
         for line in f:
-            parts = line.strip().split(", ")
+            parts = line.strip().split(",")
             if len(parts) != 4:
                 continue
             username, book_id, title, req = parts
@@ -1017,7 +1017,7 @@ def auto_cleanup_pending():
 
     with open(pending_file, "r") as f:
         for line in f:
-            parts = line.strip().split(", ")
+            parts = line.strip().split(",")
             if len(parts) != 4:
                 continue
             username, book_id, title, issue_date = parts
@@ -1036,7 +1036,7 @@ def update_book_quantity(title, change):
     lines = []
     with open(book_file, "r") as f:
         for line in f:
-            book_id, btitle, language, quantity, author = line.strip().split(", ")
+            book_id, btitle, language, quantity, author = line.strip().split(",")
             if btitle.lower() == title.lower():
                 quantity = str(int(quantity) + change)
             lines.append(f"{book_id}, {btitle}, {language}, {quantity}, {author}\n")
