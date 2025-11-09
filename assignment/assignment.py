@@ -654,16 +654,14 @@ def staff_pending_approval():
             print("Invalid index.\n")
             return
 
-        user, book_isbn, title, req_date = lines[idx].split(",")
+        user, book_isbn, title, req_date = lines[idx].split(", ")
 
         issue_date = datetime.now().strftime("%Y-%m-%d")
         due_date = (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d")
+
         with open(borrowed_file, "a") as bf:
-            bf.write(f"{user}, {title}, {issue_date}, {due_date}, N/A\n")
+            bf.write(f"{user}, {book_isbn}, {title}, {issue_date}, {due_date}, N/A\n")
 
-        update_book_quantity(title, -1)
-
-        # rewrite pending file after removing approved record
         del lines[idx]
         with open(pending_file, "w") as f:
             for l in lines:
@@ -692,11 +690,11 @@ def staff_reject_pending():
             return
 
         print("=" * 119)
-        print(f"| {'INDEX':^6} | {'USERNAME':^15} | {'Book ISBN':^20} | {'BOOK TITLE':^50} | {'REQUEST DATE':^12} |")
+        print(f"| {'INDEX':^6} | {'USERNAME':^15} | {'BOOK ISBN':^20} | {'BOOK TITLE':^50} | {'REQUEST DATE':^12} |")
         print("=" * 119)
 
         for i, line in enumerate(lines, start=1):
-            parts = line.split(",")
+            parts = line.split(", ")
             if len(parts) < 4:
                 continue
             user, book_isbn, title, req_date = parts
@@ -717,17 +715,21 @@ def staff_reject_pending():
             print("Invalid index.\n")
             return
 
-        user, book_isbn, title, req_date = lines[idx].split(",")
+        user, book_isbn, title, req_date = lines[idx].split(", ")
+
+        # Return the reserved copy back to inventory
+        update_book_quantity(book_isbn, +1)
+
+        # Remove record
         del lines[idx]
         with open(pending_file, "w") as f:
             for l in lines:
                 f.write(l + "\n")
 
-        print(f"Pending request for '{title}' by {user} rejected successfully.\n")
+        print(f"Pending request for '{title}' by {user} has been rejected.\n")
 
     except Exception as e:
         print(f"Error: {e}\n")
-
 
 # === STAFF: ISSUE BOOK PHYSICALLY ===
 def staff_issue_physical():
@@ -849,27 +851,25 @@ def report_issued_books():
 
 # === MEMBER MENU ===
 def member_menu(username):
-    auto_cleanup_pending()
+    cleanup_expired_pending()
     while True:
-        print(f"\n=== MEMBER MENU ({username}) ===")
-        print("1. Search Book")
-        print("2. View My Borrowed Books")
-        print("3. View My Pending Requests")
+        print("\n=== MEMBER MENU ===")
+        print("1. Search & Borrow Book")
+        print("2. View Pending Requests")
+        print("3. View Borrowed Books")
         print("0. Logout")
         choice = input("Enter your choice: ").strip()
-
         if choice == "1":
             search_and_inquiry_member(username)
         elif choice == "2":
-            view_my_borrowed_books(username)
-        elif choice == "3":
             view_my_pending_requests(username)
+        elif choice == "3":
+            view_my_borrowed_books(username)
         elif choice == "0":
-            print(f"\nLogging out {username}...\n")
+            print("Logging out...\n")
             break
         else:
-            print("Invalid choice.\n")
-
+            print("Invalid input.\n")
 
 # === SEARCH AND INQUIRY MEMBER ===
 def search_and_inquiry_member(username):
@@ -877,6 +877,7 @@ def search_and_inquiry_member(username):
     keyword = input("Enter book ID, title, or author (0 to cancel): ").strip()
     if keyword == "0":
         return
+
     found = False
 
     try:
@@ -885,7 +886,7 @@ def search_and_inquiry_member(username):
             return
 
         with open(book_file, "r") as f:
-            books = [line.strip().split(",") for line in f if line.strip()]
+            books = [[x.strip() for x in line.strip().split(",")] for line in f if line.strip()]
 
         for book in books:
             if len(book) != 5:
@@ -894,6 +895,7 @@ def search_and_inquiry_member(username):
             if keyword.lower() in book_isbn.lower() or keyword.lower() in title.lower() or keyword.lower() in author.lower():
                 found = True
                 status = "Available" if int(quantity) > 0 else "Unavailable"
+
                 print("=" * 141)
                 print(f"| {'BOOK ISBN':^20} | {'BOOK TITLE':^50} | {'AUTHOR':^30} | {'LANGUAGE':^12} | {'STATUS':^13} |")
                 print("=" * 141)
@@ -901,10 +903,12 @@ def search_and_inquiry_member(username):
                 print("=" * 141)
 
                 if status == "Available":
-                    borrow = input("Enter any key to borrow, or 0 to cancel: ").strip()
-                    if borrow != "0":
+                    confirm = input("Enter any key to borrow, or 0 to cancel: ").strip()
+                    if confirm != "0":
                         save_pending_borrow(username, book_isbn, title)
                         print(f"Borrow request submitted! Please collect within 3 days.\n")
+                    else:
+                        print("Cancelled.\n")
                 else:
                     print("Book currently unavailable.\n")
                 break
@@ -949,10 +953,11 @@ def view_my_pending_requests(username):
         print(f"Error: {e}\n")
 
 # === SAVE PENDING BORROW ===
-def save_pending_borrow(username, book_id, title):
-    issue_date = date.today().strftime("%Y-%m-%d")
+def save_pending_borrow(username, book_isbn, title):
+    request_date = datetime.now().strftime("%Y-%m-%d")
     with open(pending_file, "a") as f:
-        f.write(f"{username}, {book_id}, {title}, {issue_date}\n")
+        f.write(f"{username}, {book_isbn}, {title}, {request_date}\n")
+    update_book_quantity(book_isbn, -1)
 
 # === VIEW MY BORROWED BOOKS ===
 def view_my_borrowed_books(username):
@@ -989,24 +994,33 @@ def view_my_borrowed_books(username):
 def cleanup_expired_pending():
     if not os.path.exists(pending_file):
         return
-    today = date.today()
-    kept = []
+
+    today = datetime.now()
+    valid_lines = []
+    expired = []
 
     with open(pending_file, "r") as f:
         for line in f:
             parts = line.strip().split(",")
-            if len(parts) != 4:
+            if len(parts) < 4:
                 continue
-            username, book_id, title, req = parts
+            user, book_isbn, title, request_date = parts
             try:
-                req_date = datetime.strptime(req, "%Y-%m-%d").date()
-                if (today - req_date).days <= 3:
-                    kept.append(line)
-            except ValueError:
-                continue
+                req_date = datetime.strptime(request_date, "%Y-%m-%d")
+                if (today - req_date).days > 3:
+                    expired.append((book_isbn, title))
+                else:
+                    valid_lines.append(line)
+            except:
+                valid_lines.append(line)
 
     with open(pending_file, "w") as f:
-        f.writelines(kept)
+        for line in valid_lines:
+            f.write(line + "\n" if not line.endswith("\n") else line)
+
+    for book_isbn, title in expired:
+        update_book_quantity(book_isbn, +1)
+        print(f"Pending borrow for '{title}' expired — quantity restored.")
 
 
 def auto_cleanup_pending():
@@ -1031,17 +1045,32 @@ def auto_cleanup_pending():
     with open(pending_file, "w") as f:
         f.writelines(kept_records)
 
-
-def update_book_quantity(title, change):
+def update_book_quantity(identifier, change):
     lines = []
-    with open(book_file, "r") as f:
-        for line in f:
-            book_id, btitle, language, quantity, author = line.strip().split(",")
-            if btitle.lower() == title.lower():
-                quantity = str(int(quantity) + change)
-            lines.append(f"{book_id}, {btitle}, {language}, {quantity}, {author}\n")
-    with open(book_file, "w") as f:
-        f.writelines(lines)
+    found = False
+
+    try:
+        with open(book_file, "r") as f:
+            for line in f:
+                parts = [x.strip() for x in line.strip().split(",")]
+                if len(parts) != 5:
+                    continue
+
+                book_id, title, language, quantity, author = parts
+                if identifier.lower() in (book_id.lower(), title.lower()):
+                    new_qty = max(0, int(quantity) + change)
+                    lines.append(f"{book_id}, {title}, {language}, {new_qty}, {author}\n")
+                    found = True
+                else:
+                    lines.append(f"{book_id}, {title}, {language}, {quantity}, {author}\n")
+
+        with open(book_file, "w") as f:
+            f.writelines(lines)
+
+    except FileNotFoundError:
+        print("book.txt not found.")
+    except Exception as e:
+        print(f"Error in update_book_quantity(): {e}")
 
 # Function: Display the visitor menu
 def visitor_menu():
