@@ -20,10 +20,10 @@ def ensure_newline(path):
 def isbn_input():
     while True:
         #enter and verify book isbn
-        isbn = input("Enter Book ISBN : ").strip()
+        isbn = input("Enter Book ISBN: ").strip()
         if isbn == "0":
             return isbn
-        isbn1 = input("Enter Book ISBN Again to Verify : ").strip()
+        isbn1 = input("Enter Book ISBN Again to Verify: ").strip()
         if isbn1 == "0":
             return isbn1
         if isbn != isbn1:
@@ -364,7 +364,7 @@ def admin_change_user_password():
                             if not p1:
                                 print("Password cannot be empty. Try again.")
                                 continue
-                            if p1.isalnum():
+                            if not p1.isalnum():
                                 print("Password must be letters/numbers only.")
                                 continue
                             if p1 != p2:
@@ -1065,6 +1065,7 @@ def visitor_menu():
         return None
 
 # Function: Search for a book by isbn, title, author, ID, or language
+# Function: Search for a book by isbn, title, author, ID, or language
 def search_book():
     # Convert user input to lowercase for case-insensitive search
     keyword = input("Enter(Book title or Book ISBN or Author or Language): ").lower()
@@ -1074,34 +1075,37 @@ def search_book():
             record = f.readlines()
             if not record:
                 print("No records found.\n")
-            # Print header
-            print("=" * 141)
-            print(f"| {'BOOK_ISBN':^20} | {'BOOK TITLE':^50} | {'AUTHOR':^30} | {'LANGUAGE':^12} | {'STATUS':^13} |")
-            print("=" * 141)
-            for line in record: # Loop through each line (book record) in the file
+                return visitor_menu()
+            for line in record:  # Loop through each line (book record) in the file
                 book_isbn, title, language, quantity, author = line.strip().split(",")
+                # Check for match
                 if keyword in title.lower() or keyword in author.lower() or keyword in book_isbn.lower() or keyword in language.lower():
-                    # Determine book availability
-                   if int(quantity) > 0:
-                       status = "Available"
-                       found = True
-                   else:
-                       status = "Not Available"
-                       found = True
-                    # Print each matching book in a formatted table row
-                   print(f"| {book_isbn:^20} | {title:<50} | {author:<30} | {language:<12} | {status:<13} |")
-                   print("=" * 141)
+                    # Print header once, when first match is found
+                    if not found:
+                        # Print header
+                        print("=" * 141)
+                        print(f"| {'BOOK_ISBN':^20} | {'BOOK TITLE':^50} | {'AUTHOR':^30} | {'LANGUAGE':^12} | {'STATUS':^13} |")
+                        print("=" * 141)
+                        found = True
+                        # Determine book availability
+                        if int(quantity) > 0:
+                           status = "Available"
+                        else:
+                           status = "Not Available"
+                        # Print each matching book in a formatted table row
+                        print(f"| {book_isbn:^20} | {title:<50} | {author:<30} | {language:<12} | {status:<13} |")
+                        print("=" * 141)
+                        print()
 
         # If no matching record found, display message
         if not found:
-            print("\nNo matching books found! Please enter a valid author or book name or book ISBN or language.")
+            print("\nNo matching books found! Please enter a valid author or book name or book ISBN or language.\n")
 
     except FileNotFoundError: # Handle case where the file does not exist
         print("No records found.\n")
 
     # Return to visitor menu after search
     return visitor_menu()
-
 
 # Function: Display all books in the library catalog
 def display_book():
