@@ -32,7 +32,7 @@ def isbn_input():
 
         clean_isbn = isbn.replace("-", "").replace(" ", "")
         if len(clean_isbn) == 10:
-            #check whether the 10 digit number is valid isbn-10 format or not
+            #check whether the 10-digit number is valid isbn-10 format or not
             if not valid_isbn10(clean_isbn):
                 print("Invalid ISBN-10. Please try again.\n")
                 continue
@@ -41,7 +41,7 @@ def isbn_input():
             print(f"Converting ISBN-10 → ISBN-13: {clean_isbn}\n")
             return clean_isbn
         elif len(clean_isbn) == 13:
-            #check whether the 13 digit number is valid isbn-13 format or not
+            #check whether the 13-digit number is valid isbn-13 format or not
             if not valid_isbn13(clean_isbn):
                 print("Invalid ISBN-13. Please try again.\n")
                 continue
@@ -294,6 +294,8 @@ def admin_menu():
                     print("1. Add Book")
                     print("2. Modify Book")
                     print("3. Delete Book")
+                    print("4. Search Book")
+                    print("5. Display Book")
                     print("0. Back to Admin Menu")
                     op2_1 = input("Enter your choice: ")
                     if op2_1 == "1":
@@ -304,6 +306,12 @@ def admin_menu():
                         continue
                     elif op2_1 == "3":
                         deletebook()
+                        continue
+                    elif op2_1 == "4":
+                        search_book()
+                        continue
+                    elif op2_1 == "5":
+                        display_book()
                         continue
                     elif op2_1 == "0":
                         break
@@ -1022,7 +1030,6 @@ def cleanup_expired_pending():
         update_book_quantity(book_isbn, +1)
         print(f"Pending borrow for '{title}' expired — quantity restored.")
 
-
 def auto_cleanup_pending():
     if not os.path.exists(pending_file):
         return
@@ -1074,24 +1081,27 @@ def update_book_quantity(identifier, change):
 
 # Function: Display the visitor menu
 def visitor_menu():
-    print("\n=== VISITOR MENU ===")
-    print("1. Search book")
-    print("2. Visit all books")
-    print("0. Return to main menu...")
-    # Prompt the user to enter a choice
-    choice = input("Enter your choice: ")
+    while True:
+        print("\n=== VISITOR MENU ===")
+        print("1. Search book")
+        print("2. Visit all books")
+        print("0. Return to main menu...")
+        # Prompt the user to enter a choice
+        choice = input("Enter your choice: ")
 
-    # Handle user's choice
-    if choice == "1":
-        return search_book()
-    elif choice == "2":
-        return display_book()
-    elif choice == "0":
-        print()
-        return None # Exit the visitor menu
-    else:
-        print("Invalid choice") # Handle invalid input
-        return None
+        # Handle user's choice
+        if choice == "1":
+            search_book()
+            continue
+        elif choice == "2":
+            display_book()
+            continue
+        elif choice == "0":
+            print()
+            return None # Exit the visitor menu
+        else:
+            print("Invalid choice\n") # Handle invalid input
+            return None
 
 # Function: Search for a book by isbn, title, author, ID, or language
 # Function: Search for a book by isbn, title, author, ID, or language
@@ -1112,9 +1122,9 @@ def search_book():
                     # Print header once, when first match is found
                     if not found:
                         # Print header
-                        print("=" * 141)
-                        print(f"| {'BOOK_ISBN':^20} | {'BOOK TITLE':^50} | {'AUTHOR':^30} | {'LANGUAGE':^12} | {'STATUS':^13} |")
-                        print("=" * 141)
+                        print("=" * 154)
+                        print(f"| {'BOOK_ISBN':^20} | {'BOOK TITLE':^50} | {'AUTHOR':^30} | {'LANGUAGE':^12} | {'STATUS':^13} | {'QUANTITY':^10} |")
+                        print("=" * 154)
                         found = True
                         # Determine book availability
                         if int(quantity) > 0:
@@ -1122,19 +1132,19 @@ def search_book():
                         else:
                            status = "Not Available"
                         # Print each matching book in a formatted table row
-                        print(f"| {book_isbn:^20} | {title:<50} | {author:<30} | {language:<12} | {status:<13} |")
-                        print("=" * 141)
+                        print(f"| {book_isbn:^20} | {title:<50} | {author:<30} | {language:<12} | {status:<13} | {quantity:<10} |")
+                        print("=" * 154)
                         print()
 
         # If no matching record found, display message
         if not found:
-            print("\nNo matching books found! Please enter a valid author or book name or book ISBN or language.\n")
+            print("\nNo matching books found! Please enter a valid author or book name or book ISBN or language.")
 
     except FileNotFoundError: # Handle case where the file does not exist
         print("No records found.\n")
 
     # Return to visitor menu after search
-    return visitor_menu()
+    return None
 
 # Function: Display all books in the library catalog
 def display_book():
@@ -1147,9 +1157,9 @@ def display_book():
                 return None
 
             # Print header
-            print("=" * 141)
-            print(f"| {'BOOK_ISBN':^20} | {'BOOK TITLE':^50} | {'AUTHOR':^30} | {'LANGUAGE':^12} | {'STATUS':^13} |")
-            print("=" * 141)
+            print("=" * 154)
+            print(f"| {'BOOK_ISBN':^20} | {'BOOK TITLE':^50} | {'AUTHOR':^30} | {'LANGUAGE':^12} | {'STATUS':^13} | {'QUANTITY':^10} |")
+            print("=" * 154)
 
             for line in record: # Loop through each record in the file
                     book_isbn, title, language, quantity, author = line.strip().split(",")
@@ -1159,13 +1169,13 @@ def display_book():
                     else:
                         status = "Not Available"
             # Print book information in formatted table
-                    print(f"| {book_isbn:^20} | {title:<50} | {author:<30} | {language:<12} | {status:<13} |")
-                    print("=" * 141)
+                    print(f"| {book_isbn:^20} | {title:<50} | {author:<30} | {language:<12} | {status:<13} | {quantity:<10} |")
+                    print("=" * 154)
 
     except FileNotFoundError: # Handle missing book file
         print("\nNo matching books found! Please enter a valid author or book name.\n")
     # Return to visitor menu after displaying books
-    return visitor_menu()
+    return None
 
 
 login()
