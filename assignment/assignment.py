@@ -662,7 +662,7 @@ def staff_pending_approval():
             print("Invalid index.\n")
             return
 
-        user, book_isbn, title, req_date = lines[idx].split(", ")
+        user, book_isbn, title, req_date = lines[idx].split(",")
 
         issue_date = datetime.now().strftime("%Y-%m-%d")
         due_date = (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d")
@@ -702,7 +702,7 @@ def staff_reject_pending():
         print("=" * 119)
 
         for i, line in enumerate(lines, start=1):
-            parts = line.split(", ")
+            parts = line.split(",")
             if len(parts) < 4:
                 continue
             user, book_isbn, title, req_date = parts
@@ -723,7 +723,7 @@ def staff_reject_pending():
             print("Invalid index.\n")
             return
 
-        user, book_isbn, title, req_date = lines[idx].split(", ")
+        user, book_isbn, title, req_date = lines[idx].split(",")
 
         # Return the reserved copy back to inventory
         update_book_quantity(book_isbn, +1)
