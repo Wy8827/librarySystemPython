@@ -560,14 +560,14 @@ def deletebook():
                 for line in f_in:
                     if not line.strip():
                         continue
-                    parts = [p.strip() for p in line.strip().split(',')]
+                    parts = [p.strip() for p in line.split(',')]
                     if len(parts) != 5:
                         f_out.write(line if line.endswith("\n") else line + "\n")
                         continue
                     ex_id, ex_name, ex_cat, ex_quan, ex_author = parts
-                    ex_name=ex_name.strip().lower().replace(" ", "")
+                    ex_name1=ex_name.strip().lower().replace(" ", "")
                     #if book searched match record in book_file skip writing this record to temp file
-                    if ex_id.lower().strip() == book_search.lower().strip() or ex_name == book_search.lower().strip():
+                    if ex_id.lower().strip() == book_search.lower().strip() or ex_name1 == book_search.lower().strip():
                         found = True
                         continue
                     else:
@@ -1173,10 +1173,9 @@ def display_book():
                     print("=" * 154)
 
     except FileNotFoundError: # Handle missing book file
-        print("\nNo record found.\n")
+        print("\nNo matching books found! Please enter a valid author or book name.\n")
     # Return to visitor menu after displaying books
     return None
-
 
 
 login()
