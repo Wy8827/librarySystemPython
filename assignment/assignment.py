@@ -1173,9 +1173,10 @@ def display_book():
                     print("=" * 154)
 
     except FileNotFoundError: # Handle missing book file
-        print("\nNo matching books found! Please enter a valid author or book name.\n")
+        print("\nNo record found.\n")
     # Return to visitor menu after displaying books
     return None
+
 
 
 login()
