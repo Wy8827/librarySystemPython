@@ -790,29 +790,55 @@ def staff_issue_physical():
 def return_book():
     print("\n=== RETURN BOOK ===")
     username = input("Enter member username: ").strip()
-    title = input("Enter book title to return: ").strip()
+    # 1. Ask for title OR ISBN
+    search_term = input("Enter book title OR ISBN to return: ").strip()
     return_date = datetime.now().strftime("%Y-%m-%d")
 
     try:
         updated = []
         returned = False
-        with open(borrowed_file, "r") as f:
-            for line in f:
-                user, book, issue, due, rdate = line.strip().split(",")
-                if user == username and book.lower() == title.lower() and rdate == "N/A":
-                    updated.append(f"{user}, {book}, {issue}, {due}, {return_date}\n")
-                    returned = True
-                else:
-                    updated.append(line)
+        book_isbn_to_update = None
+        book_title_to_display = ""  # To store the title for the print message
 
+        with open(borrowed_file, "r") as f:
+            lines = f.readlines()
+
+        for line in lines:
+            line_content = line.strip()
+            if not line_content:
+                continue
+
+            parts = [part.strip() for part in line_content.split(",")]
+
+            if len(parts) != 6:
+                updated.append(line)
+                continue
+
+            user, isbn, book, issue, due, rdate = parts
+
+            # 2. Check if the search_term matches EITHER the ISBN OR the book title
+            if (user == username and rdate == "N/A" and
+                    (isbn == search_term or book.lower() == search_term.lower())):
+
+                # We found a match! Update its return date
+                updated.append(f"{user},{isbn},{book},{issue},{due},{return_date}\n")
+                returned = True
+                book_isbn_to_update = isbn
+                book_title_to_display = book  # Save the actual title
+            else:
+                # This is not the book we're returning, so add it back unchanged
+                updated.append(line)
+
+        # 3. Write all the 'updated' lines back to the file
         with open(borrowed_file, "w") as f:
             f.writelines(updated)
 
         if returned:
-            update_book_quantity(title, 1)
-            print(f"'{title}' returned successfully on {return_date}.\n")
+            update_book_quantity(book_isbn_to_update, 1)
+            # Use the title we saved for a clear message
+            print(f"'{book_title_to_display}' returned successfully on {return_date}.\n")
         else:
-            print("No active borrowed record found.\n")
+            print("No active borrowed record found with that title or ISBN.\n")
 
     except FileNotFoundError:
         print("No borrowed records found.\n")
@@ -876,7 +902,7 @@ def report_issued_books():
         print("No borrowed records.\n")
     except Exception as e:
         print(f"Error: {e}\n")
-        
+
 # === MEMBER MENU ===
 def member_menu(username):
     cleanup_expired_pending()
