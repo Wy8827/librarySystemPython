@@ -761,7 +761,7 @@ def staff_issue_physical():
         available = None
         for book in books:
             if len(book) >= 5:
-                book_isbn, btitle, language, quantity, author = book
+                book_isbn, btitle, language, quantity, author = [x.strip() for x in book]
                 if btitle.lower() == title.lower() and int(quantity) > 0:
                     available = (book_isbn, btitle)
                     break
@@ -770,13 +770,17 @@ def staff_issue_physical():
             print("Book unavailable or not found.\n")
             return
 
+        book_isbn, btitle = available
         issue_date = datetime.now().strftime("%Y-%m-%d")
         due_date = (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d")
 
+        #Write borrowed record (including ISBN)
         with open(borrowed_file, "a") as bf:
-            bf.write(f"{username}, {title}, {issue_date}, {due_date}, N/A\n")
+            bf.write(f"{username}, {book_isbn}, {title}, {issue_date}, {due_date}, N/A\n")
 
-        update_book_quantity(title, -1)
+        # Deduct from inventory using ISBN
+        update_book_quantity(book_isbn, -1)
+
         print(f"Book '{title}' successfully issued to {username}. Due on {due_date}.\n")
 
     except Exception as e:
