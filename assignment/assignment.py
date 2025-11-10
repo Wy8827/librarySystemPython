@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timedelta, date
 account_file = "account.txt"
 book_file = "book.txt"
-temp = "temp_book.txt"
+temp = "temp.txt"
 pending_file = "pending_borrow.txt"
 borrowed_file = "borrowed_book.txt"
 
@@ -930,7 +930,7 @@ def search_and_inquiry_member(username):
 
 # === VIEW MY PENDING REQUESTS ===
 def view_my_pending_requests(username):
-    auto_cleanup_pending()
+    #auto_cleanup_pending()
     print(f"\n=== PENDING REQUESTS ({username}) ===")
     found = False
     try:
@@ -979,19 +979,20 @@ def view_my_borrowed_books(username):
         with open(borrowed_file, "r") as f:
             lines = [line.strip() for line in f if line.strip()]
 
-        print("=" * 102)
-        print(f"| {'USERNAME':^15} | {'BOOK TITLE':^50} | {'ISSUE DATE':^12} | {'DUE DATE':^12} |")
-        print("=" * 102)
+        print("=" * 120)
+        print(f"| {'USERNAME':^15} | {'BOOK ISBN':^15} | {'BOOK TITLE':^50} | {'ISSUE DATE':^12} | {'DUE DATE':^12} |")
+        print("=" * 120)
 
         for line in lines:
-            parts = line.split(",")
-            if len(parts) == 5:
-                user, title, issue, due, returned = parts
+            # Apply .strip() to each part AFTER splitting
+            parts = [part.strip() for part in line.split(",")]
+            if len(parts) == 6:
+                user, isbn, title, issue, due, returned = parts
                 if user == username and returned == "N/A":
                     found = True
-                    print(f"| {user:^15} | {title:^50} | {issue:^12} | {due:^12} |")
+                    print(f"| {user:^15} | {isbn:^15} | {title:^50} | {issue:^12} | {due:^12} |")
 
-        print("=" * 102)
+        print("=" * 120)
         if not found:
             print("No borrowed books found.\n")
 
