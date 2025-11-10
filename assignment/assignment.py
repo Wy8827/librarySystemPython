@@ -847,20 +847,36 @@ def report_issued_books():
     print("\n=== ISSUED BOOK REPORT ===")
     try:
         with open(borrowed_file, "r") as f:
-            lines = f.readlines()
+            lines = [line.strip() for line in f if line.strip()]
+
             if not lines:
                 print("No issued records.\n")
                 return
+
             print("=" * 117)
             print(f"| {'USERNAME':^15} | {'BOOK TITLE':^50} | {'ISSUED':^12} | {'DUE':^12} | {'RETURNED':^12} |")
             print("=" * 117)
+
             for line in lines:
-                user, title, issue, due, returned = line.strip().split(",")
+                parts = [x.strip() for x in line.split(",")]
+
+                # Handle both 5-field (title-only) and 6-field (old with ISBN)
+                if len(parts) == 6:
+                    user, isbn, title, issue, due, returned = parts
+                elif len(parts) == 5:
+                    user, title, issue, due, returned = parts
+                else:
+                    continue  # skip malformed lines
+
                 print(f"| {user:^15} | {title:<50} | {issue:^12} | {due:^12} | {returned:^12} |")
+
             print("=" * 117)
+
     except FileNotFoundError:
         print("No borrowed records.\n")
-
+    except Exception as e:
+        print(f"Error: {e}\n")
+        
 # === MEMBER MENU ===
 def member_menu(username):
     cleanup_expired_pending()
